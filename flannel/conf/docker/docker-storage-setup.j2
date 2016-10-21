@@ -1,0 +1,9 @@
+# Edit this file to override any configuration options specified in
+# /usr/lib/docker-storage-setup/docker-storage-setup.
+#
+# For more details refer to "man docker-storage-setup"
+
+DEVS={{ docker_storage_setup }}
+VG=docker-vg
+DATA_SIZE=80%FREE
+SETUP_LVM_THIN_POOL=yes

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+RSYNC_PASSWORD=paasci rsync -av paasci@{{ rsync_server }}::{{ k8s_rsync_repo }} /usr/bin/

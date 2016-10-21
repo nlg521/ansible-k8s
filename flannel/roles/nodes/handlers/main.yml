@@ -1,0 +1,20 @@
+---
+- name: restart daemons
+  command: /usr/bin/true 
+  notify:
+    - delete docker0
+    - restart docker
+    - restart kubelet
+    - restart proxy
+
+- name: delete docker0
+  command: ip link delete docker0
+
+- name: restart docker
+  service: name=docker state=restarted
+
+- name: restart kubelet
+  service: name=kubelet state=restarted
+
+- name: restart proxy
+  service: name=kube-proxy state=restarted

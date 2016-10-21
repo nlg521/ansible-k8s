@@ -1,0 +1,20 @@
+###
+# kubernetes kubelet (minion) config
+
+# The address for the info server to serve on (set to 0.0.0.0 or "" for all interfaces)
+KUBELET_ADDRESS="--address=0.0.0.0"
+
+# The port for the info server to serve on
+KUBELET_PORT="--port=10250"
+
+# You may leave this blank to use the actual hostname
+KUBELET_HOSTNAME="--hostname-override={{ inventory_hostname }}"
+
+# location of the api-server
+KUBELET_API_SERVER="--api-servers=http://{{ groups['master'][0] }}:8080"
+
+# pod infrastructure container
+KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=vipdocker-f9nub.vclound.com/google_containers/pause:0.8.0"
+
+# Add your own!
+KUBELET_ARGS="--config=/var/lib/kubelet/static-pod-manifest --cluster-dns={{ dns_server }} --cluster-domain={{ dns_domain }} --image-gc-high-threshold=60 --image-gc-low-threshold=40 --maximum-dead-containers=20 --maximum-dead-containers-per-container=1"

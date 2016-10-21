@@ -1,0 +1,41 @@
+---
+- name: Copy easy-rsa.tar.gz file
+  copy: src=easy-rsa.tar.gz dest=/usr/local/src/easy-rsa.tar.gz
+
+- name: Copy make ca cert script
+  template: src=make-ca-cert.sh.j2 dest=~/make-ca-cert.sh mode=0755
+
+- name: Run make ca cert script
+  command: ~/make-ca-cert.sh {{ groups['master'][0] }} IP:{{ kube_service_cluster_ip }}
+
+- name: Remove make ca cert script
+  file: name={{ item }} state=absent
+  with_items:
+    - "~/make-ca-cert.sh"
+
+- name: Copy basic_auth && known_tokens
+  copy: src={{ item.src }} dest={{ item.dest }} group=kube mode=0660
+  with_items:
+    - src: "basic_auth.csv"
+      dest: "/srv/kubernetes/basic_auth.csv"
+    - src: "known_tokens.csv"
+      dest: "/srv/kubernetes/known_tokens.csv"
+
+- name: write the config files for api server
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - src: "apiserver.j2"
+      dest: "/etc/kubernetes/apiserver"
+    - src: "controller-manager.j2"
+      dest: "/etc/kubernetes/controller-manager"
+    - src: "scheduler.j2"
+      dest: "/etc/kubernetes/scheduler"
+  notify:
+    - restart daemons
+
+- name: Enable k8s master service
+  service: name={{ item }} enabled=yes state=started
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler

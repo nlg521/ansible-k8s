@@ -1,0 +1,38 @@
+- name: Write SkyDNS pod & svc & kube-system namespace file
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - src: kube-system-ns.yaml.j2
+      dest: /etc/kubernetes/kube-system-ns.yaml
+    - src: skydns-rc.yaml.j2
+      dest: /etc/kubernetes/skydns-rc.yaml
+    - src: skydns-svc.yaml.j2
+      dest: /etc/kubernetes/skydns-svc.yaml
+  when: dns_setup
+
+- name: Check that the DNS pod exists
+  shell: kubectl get rc kube-dns-v8 --namespace=kube-system
+  register: has_dns_pod
+  failed_when: false
+  changed_when: false
+
+- name: Create SkyDNS pod
+  shell: kubectl create -f /etc/kubernetes/kube-system-ns.yaml && kubectl create -f /etc/kubernetes/skydns-rc.yaml
+  when: dns_setup and has_dns_pod.rc != 0
+
+- name: Update DNS replication service
+  shell: kubectl replace -f /etc/kubernetes/skydns-rc.yaml
+  when: dns_setup and has_dns_pod.rc == 0
+
+- name: Check that the DNS service exists
+  shell: kubectl get service kube-dns --namespace=kube-system
+  register: has_dns_service
+  failed_when: false
+  changed_when: false
+
+- name: Create SkyDNS service
+  shell: kubectl create -f /etc/kubernetes/skydns-svc.yaml
+  when: dns_setup and has_dns_service.rc != 0
+
+- name: Update SkyDNS service
+  shell: kubectl replace -f /etc/kubernetes/skydns-svc.yaml
+  when: dns_setup and has_dns_service.rc == 0

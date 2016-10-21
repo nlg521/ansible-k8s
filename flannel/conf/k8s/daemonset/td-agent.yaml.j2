@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    app: fluentd-agent
+  name: k8s-fluentd-agent
+spec:
+  template:
+    metadata:
+      labels:
+        app: fluentd-agent-shared
+    spec:
+      restartPolicy: Always
+      containers:
+      - image: vipdocker-f9nub.vclound.com/paas/k8s-td-agent:v1.1
+        name: fluentd-agent
+        volumeMounts:
+          - mountPath: /var/log
+            name: k8slog
+          - mountPath: /var/lib/docker
+            name: dockerlog
+          - mountPath: /etc/td-agent
+            name: tdconf
+          - name: systemd
+            mountPath: /var/run/log
+      volumes:
+        - hostPath:
+            path: /var/log
+          name: k8slog
+        - hostPath:
+            path: /var/lib/docker
+          name: dockerlog
+        - hostPath:
+            path: /etc/td-agent
+          name: tdconf
+        - hostPath:
+            path: /var/run/log
+          name: systemd

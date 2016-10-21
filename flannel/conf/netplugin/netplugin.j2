@@ -1,0 +1,8 @@
+PLUGIN_MODE_OPTIONS="-plugin-mode docker"
+VLAN_IF_OPTIONS="-vlan-if bond0"
+OVS_MODE_OPTIONS="-ovs-mode normal"
+DEBUG_OPTIONS="-debug"
+STORE_URL_OPTIONS="-store-url=http://{{ groups['etcd'][0] }}:4001"
+LOCAL_IP_OPTIONS="-local-ip={{ inventory_hostname }}"
+SSH_IP="{{ inventory_hostname }}"
+IS_ADD_SSH_FLOW="YES"

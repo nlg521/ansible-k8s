@@ -1,0 +1,118 @@
+<match fluent.**>
+  type null
+</match>
+
+#collect all the k8s pod logs exclude the k8s-fluentd-agent itself's log
+<source>
+  type tail
+  path /var/log/containers/*.log
+  exclude_path ["/var/log/containers/k8s-fluentd-agent*.log"]
+  pos_file /var/log/es-containers.log.pos
+  tag kubernetes.*
+  format json
+  read_from_head true
+</source>
+
+<source>
+  type systemd
+  path /var/run/log/journal
+  filters [{ "_SYSTEMD_UNIT": "docker.service" }]
+  pos_file /var/log/docker.log.pos
+  tag paas-comp.docker
+  strip_underscores true
+</source>
+
+<source>
+  type systemd
+  path /var/run/log/journal
+  filters [{ "_SYSTEMD_UNIT": "kube-apiserver.service" }]
+  pos_file /var/log/kube-apiserver.log.pos
+  tag paas-comp.kube-apiserver
+  strip_underscores true
+</source>
+
+<source>
+  type systemd
+  path /var/run/log/journal
+  filters [{ "_SYSTEMD_UNIT": "kube-controller-manager.service" }]
+  pos_file /var/log/kube-controller-manager.log.pos
+  tag paas-comp.kube-controller-manager
+  strip_underscores true
+</source>
+
+<source>
+  type systemd
+  path /var/run/log/journal
+  filters [{ "_SYSTEMD_UNIT": "kubelet.service" }]
+  pos_file /var/log/kubelet.log.pos
+  tag paas-comp.kubelet
+  strip_underscores true
+</source>
+
+<source>
+  type systemd
+  path /var/run/log/journal
+  filters [{ "_SYSTEMD_UNIT": "kube-proxy.service" }]
+  pos_file /var/log/kube-proxy.log.pos
+  tag paas-comp.kube-proxy
+  strip_underscores true
+</source>
+
+<source>
+  type systemd
+  path /var/run/log/journal
+  filters [{ "_SYSTEMD_UNIT": "kube-scheduler.service" }]
+  pos_file /var/log/kube-scheduler.log.pos
+  tag paas-comp.kube-scheduler
+  strip_underscores true
+</source>
+<filter paas-comp.*>
+  @type record_transformer
+  enable_ruby true
+  #to keep the original log's timestamp in elasticsearch
+  <record>
+    @timestamp ${DateTime.now}
+  </record>
+  remove_keys PRIORITY,UID,GID,SYSTEMD_SLICE,BOOT_ID,CAP_EFFECTIVE,COMM,EXE,MACHINE_ID,CMDLINE
+</filter>
+
+<filter kubernetes.**>
+  @type record_transformer
+  enable_ruby true
+  #to keep the original log's timestamp in elasticsearch
+  <record>
+    @timestamp ${DateTime.now}
+  </record>
+  #to avoid the deep json structure in elasticsearch that the search fields will be in a mess
+  <record>
+    log ${(log =~ /^{.*}/)? "-" + log : log }
+  </record>
+  remove_keys time
+</filter>
+# Add the k8s metadata information to origin log record(docker stdout log)
+<filter kubernetes.**>
+  type kubernetes_metadata
+  kubernetes_url http://{{ groups['master'][0] }}:8080
+  verify_ssl false
+</filter>
+# output to kafka
+<match kubernetes.**>
+  @type kafka_buffered
+  #brokers chao-data06.vclound.com:9092,chao-data07.vclound.com:9092,chao-data08.vclound.com:9092 #10.199.196.107:9092,10.199.196.108:9092,10.199.196.109:9092 
+  zookeeper chao-data06.vclound.com:2181,chao-data07.vclound.com:2181,chao-data08.vclound.com:2181/kafka
+  default_topic paas-app
+  output_data_type json
+  buffer_type memory
+  flush_interval 10
+</match>
+
+<match paas-comp.*>
+  @type kafka_buffered
+  #brokers chao-data06.vclound.com:9092,chao-data07.vclound.com:9092,chao-data08.vclound.com:9092 #10.199.212.89:9092
+  zookeeper chao-data06.vclound.com:2181,chao-data07.vclound.com:2181,chao-data08.vclound.com:2181/kafka
+  default_topic paas-comp
+  output_data_type json
+  output_include_time true
+  buffer_type memory
+  flush_interval 10
+</match>

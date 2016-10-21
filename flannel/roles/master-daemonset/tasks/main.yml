@@ -1,0 +1,15 @@
+---
+- name: Create daemonset yaml folder
+  file: path=/root/yaml state=directory
+
+- name: Write td-agent daemonset config
+  template: src=td-agent.yaml.j2 dest=/root/yaml/td-agent.yaml
+  notify:
+    - Remove td-agent daemonset
+    - Recreate td-agent daemonset
+
+- name: Write flume daemonset config
+  template: src=flume.yaml.j2 dest=/root/yaml/flume.yaml
+  notify:
+    - Remove flume daemonset
+    - Recreate flume daemonset

@@ -1,0 +1,29 @@
+- hosts: all
+  roles:
+    - common
+
+- hosts: etcd
+  roles:
+    - etcd-cluster
+
+- hosts: master
+  roles:
+    - kubernetes
+    - master
+    - skydns
+
+- hosts: nodes
+  roles:
+    - kubernetes
+    - docker
+    - nodes
+
+- hosts: etcd[0]
+  roles:
+    - flannel-config
+
+- hosts: 
+    - master
+    - nodes
+  roles:
+    - flannel

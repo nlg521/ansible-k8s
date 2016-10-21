@@ -1,0 +1,17 @@
+---
+- name: Stop kubelet & kube-proxy
+  service: name={{ item }} state=stopped
+  with_items:
+    - kubelet
+    - kube-proxy
+
+- name: Update k8s bin 
+  shell: RSYNC_PASSWORD=paasci rsync -av paasci@{{ rsync_server }}::{{ k8s_rsync_repo }} /usr/bin/
+  ignore_errors: yes
+
+- name: Start k8s kubelet & kube-proxy
+  service: name={{ item }} state=started
+  with_items:
+    - kube-proxy
+    - kubelet
+

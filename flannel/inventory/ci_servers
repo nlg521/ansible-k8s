@@ -1,0 +1,13 @@
+[master]
+
+
+[etcd]
+
+
+[nodes]
+
+
+[ci:children]
+master
+etcd
+nodes

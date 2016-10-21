@@ -1,0 +1,14 @@
+---
+- name: Update k8s master conf
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - src: "config.j2"
+      dest: "/etc/kubernetes/config"
+    - src: "apiserver.j2"
+      dest: "/etc/kubernetes/apiserver"
+    - src: "controller-manager.j2"
+      dest: "/etc/kubernetes/controller-manager"
+    - src: "scheduler.j2"
+      dest: "/etc/kubernetes/scheduler"
+  notify:
+    - restart k8s master

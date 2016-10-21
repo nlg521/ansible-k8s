@@ -1,0 +1,23 @@
+---
+- name: Update centos yum repo to the IaaS latest && and add docker repo
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - src: CentOS-Base.repo.j2
+      dest: /etc/yum.repos.d/CentOS-Base.repo
+    - src: docker.repo.j2
+      dest: /etc/yum.repos.d/docker.repo
+
+- name: Install tuned service
+  yum: pkg={{ item }} state=latest
+  with_items:
+    - tuned
+    - tuned-profiles-atomic.noarch
+
+- name: Write the tuned conf
+  template: src=tuned.conf.j2 dest=/usr/lib/tuned/throughput-performance/tuned.conf
+
+- name: Enable tuned service
+  service: name=tuned enabled=yes state=started
+
+- name: Enable atomic tuned profile
+  command: tuned-adm profile atomic-host 

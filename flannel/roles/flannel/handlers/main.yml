@@ -1,0 +1,18 @@
+---
+- name: restart flannel
+  service: name=flanneld state=restarted
+  notify:
+    - delete docker0
+    - restart docker
+    - restart kubelet
+
+- name: delete docker0
+  command: ip link delete docker0
+  ignore_errors: yes
+
+- name: restart docker
+  service: name=docker state=restarted
+
+- name: restart kubelet
+  service: name=kubelet state=restarted
+  when: inventory_hostname in groups['nodes']

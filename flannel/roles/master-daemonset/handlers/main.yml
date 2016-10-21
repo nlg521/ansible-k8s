@@ -1,0 +1,14 @@
+---
+- name: Remove td-agent daemonset
+  command: kubectl delete ds k8s-fluentd-agent
+  ignore_errors: True
+
+- name: Recreate td-agent daemonset
+  command: kubectl create -f /root/yaml/td-agent.yaml
+
+- name: Remove flume daemonset
+  command: kubectl delete ds flume
+  ignore_errors: True
+
+- name: Recreate flume daemonset
+  command: kubectl create -f /root/yaml/flume.yaml

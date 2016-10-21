@@ -1,0 +1,7 @@
+- hosts: nodes
+  roles:
+    - { role: "common", tags: "common" }
+    - { role: "kubernetes", tags: "kubernetes" }
+    - { role: "docker", tags: docker }
+    - { role: "nodes", tags: "nodes" }
+    - { role: "flannel", tags: "flannel" }

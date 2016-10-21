@@ -1,0 +1,36 @@
+# Account name of remote user
+ansible_ssh_user: root
+
+# Kubernetes internal network for services.
+# Kubernetes services will get fake IP addresses from this range.
+# This range must not conflict with anything in your infrastructure. These
+# addresses do not need to be routable and must just be an unused block of space.
+kube_service_addresses: 10.254.0.0/16
+kube_service_cluster_ip: 10.254.0.1
+
+# Flannel internal network (optional). When flannel is used, it will assign IP
+# addresses from this range to individual pods.
+# This network must be unused in your network infrastructure!
+kube_overlay_ip: 172.17.0.0
+
+# Prefix length of kube_overlay_ip range.
+kube_overlay_prefix: 16
+
+# Internal DNS configuration.
+dns_setup: true            # 请确认 skydns 是否部署在集群中还是集群之外，集群之外则修改为 false
+
+# Internal DNS domain name.
+# This domain must not be used in your network. Services will be discoverable
+# under <service-name>.<namespace>.<domainname>, e.g.
+dns_domain: paasinfras.vip.com
+
+# IP address of the DNS server.
+dns_server: 10.254.0.100    # 请确认 skydns 部署在集群中还是在集群之外，集群之中则使用 10.254.0.100,否则变量更改为实际 skydns 所在主机
+#dns_server: 10.199.128.41
+
+# Rsync Server
+rsync_server: 10.197.128.100
+k8s_rsync_repo: k8s_test_bin
+
+# Private docker registry
+private_docker_registry: vipdocker-f9nub.vclound.com

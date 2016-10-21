@@ -1,0 +1,7 @@
+- hosts: master
+  roles:
+    - { role: 'common', tags: 'common' }    
+    - { role: 'kubernetes', tags: 'kubernetes' }
+    - { role: 'master', tags: 'master' }
+    - { role: 'master-daemonset', tags: 'master-daemonset' }
+    - { role: 'skydns', tags:'skydns' }

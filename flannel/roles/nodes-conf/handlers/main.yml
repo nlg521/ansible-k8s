@@ -1,0 +1,6 @@
+---
+- name: restart kubelet and kube-proxy
+  service: name={{ item }} state=restarted
+  with_items:
+      - kubelet
+      - kube-proxy

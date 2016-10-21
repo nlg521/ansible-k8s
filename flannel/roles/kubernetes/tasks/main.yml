@@ -1,0 +1,16 @@
+---
+- name: Install kubernetes from CentOS7 packages
+  yum: pkg=kubernetes state=latest
+
+- name: write the global config file
+  template: src=config.j2 dest=/etc/kubernetes/config
+
+- name: Get latest Kubernetes binarry script
+  template: src=get_k8s_bin.sh.j2 dest=~/get_k8s_bin.sh mode=0755
+
+- name: Run get latest Kubernetes binarry script
+  command: ~/get_k8s_bin.sh
+
+- name: Remove the configure script
+  file: name=~/get_k8s_bin.sh state=absent
+

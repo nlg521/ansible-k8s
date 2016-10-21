@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    app: ds-flume
+  name: flume
+spec:
+  template:
+    metadata:
+      labels:
+        app: ds-flume-shared
+    spec:
+      restartPolicy: Always
+      containers:
+      - image: vipdocker-f9nub.vclound.com/paas/flume:staging
+        name: flume
+        volumeMounts:
+          - mountPath: /apps/logs
+            name: applog
+      volumes:
+        - hostPath:
+            path: /apps/logs
+          name: applog

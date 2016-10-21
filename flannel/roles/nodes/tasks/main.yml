@@ -1,0 +1,32 @@
+---
+- name: write the config files for kubelet & proxy
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - src: "kubelet.j2"
+      dest: "/etc/kubernetes/kubelet"
+    - src: "proxy.j2"
+      dest: "/etc/kubernetes/proxy"
+
+- name: Create td-agent conf folder
+  file: path=/etc/td-agent state=directory
+
+- name: Write the td-agent service conf
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - src: "td-agent.conf.j2"
+      dest: "/etc/td-agent/td-agent.conf"
+
+- name: write the .dockercfg to /var/lib/kubelet
+  template: src=.dockercfg.j2 dest=/var/lib/kubelet/.dockercfg mode=0600
+  notify:
+    - restart daemons
+
+- name: Enable docker & kubelet & kube-proxy
+  service: name={{ item }} enabled=yes state=started
+  with_items:
+    - docker
+    - kubelet
+    - kube-proxy
+
+- name: Start node agent
+  command: docker run {{ node_agent_docker_opts }} {{ node_agent_image }}
